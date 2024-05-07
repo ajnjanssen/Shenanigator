@@ -25,15 +25,11 @@ const Shenanigan: React.FC<ShenaniganProps> = ({
   return (
     <tr className="hover">
       <td>
-        <Link href={"/user/" + user}>
+        <Link href={"/user/" + username}>
           <div className="flex items-center gap-3">
             <div className="avatar">
               <div className="mask mask-squircle w-12 h-12">
-                {/* <img src={userImage} alt="User avatar" /> */}
-                <img
-                  src="https://st3.depositphotos.com/9998432/13335/v/450/depositphotos_133351928-stock-illustration-default-placeholder-man-and-woman.jpg"
-                  alt="User avatar"
-                />
+                <img src={userImage} alt="User avatar" />
               </div>
             </div>
             <div>

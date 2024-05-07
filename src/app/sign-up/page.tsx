@@ -21,7 +21,7 @@ function index() {
   const [avatar, setAvatar] = useState("");
   const router = useRouter();
   const [user] = useAuthState(auth);
-
+  const userLevel = 1;
   // Create a root reference
   const storage = getStorage();
   const handleSignUp = async () => {
@@ -33,6 +33,7 @@ function index() {
           email: email,
           avatar: avatar,
           userId: res.user.uid,
+          level: userLevel,
         });
 
         setUsername("");

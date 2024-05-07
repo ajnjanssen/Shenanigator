@@ -3,85 +3,103 @@ import Shenanigan from "./Shenanigan";
 import { auth, db } from "@/app/services/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { set } from "firebase/database";
+
+interface User {
+  name?: string;
+  image?: string;
+  level?: number;
+  avatar?: string;
+}
+
+interface ShenaniganData {
+  level: string;
+  image: string;
+  id: string;
+  userId: string;
+  username: string;
+  userImage: string;
+  userLevel: string;
+  counter: number;
+  setShenanigan: string;
+  dateCreated: string;
+  setByUser: string;
+  selectedUser: string;
+}
 
 function Table() {
   const [user] = useAuthState(auth);
-  const [shenanigans, setShenanigans] = useState<
-    {
-      level: string;
-      image: string;
-      id: string;
-      userId: string;
-      username: any;
-      userImage: string;
-      userLevel: string;
-      counter: number;
-      setShenanigan: string;
-      dateCreated: any;
-      setByUser: string;
-      selectedUser: string;
-    }[]
-  >([]);
+  const [shenanigans, setShenanigans] = useState<ShenaniganData[]>([]);
 
   useEffect(() => {
     const getShenanigans = async () => {
       const querySnapshot = await getDocs(collection(db, "shenanigans"));
-      const shenanigansData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        userId: doc.data().user, // Add the missing userId property
-        username: doc.data().user, // Add the missing username property
-        // userImage: "", // Add the missing userImage property
-        userLevel: "", // Add the missing userLevel property
-        counter: doc.data().counter, // Access the 'counter' property using the '.data()' method
-        setShenanigan: doc.data().shenanigen, // Access the 'shenanigan' property using the '.data()' method
-        dateCreated: doc.data().dateCreated, // Access the 'dateCreated' property using the '.data()' method
-        setByUser: user?.uid || "", // Add null check for 'user' variable and provide a default value of ""
-        selectedUser: doc.data().selectedUser, // Access the 'selectedUser' property using the '.data()' method
-      }));
+      const usersSnapshot = await getDocs(collection(db, "Users"));
+      const users: Record<string, User> = usersSnapshot.docs.reduce(
+        (acc, userDoc) => {
+          const userData = userDoc.data() as User;
+          acc[userData.name || ""] = userData; // Use name as the key
+          return acc;
+        },
+        {} as Record<string, User>
+      ); // Add index signature to the type of acc
+
+      const shenanigansData: ShenaniganData[] = querySnapshot.docs.map(
+        (doc) => {
+          const shenanigan = doc.data();
+          const user = users[shenanigan.selectedUser] || {}; // Lookup by name
+          return {
+            id: doc.id,
+            userId: shenanigan.user,
+            username: user.name || "Unknown",
+            level: user.level?.toString() || "Unknown",
+            image: user.image || "",
+            userImage: user.avatar || "",
+            userLevel: user.level?.toString() || "Unknown",
+            counter: shenanigan.counter,
+            setShenanigan: shenanigan.shenanigen,
+            dateCreated: shenanigan.dateCreated.toDate().toString(),
+            setByUser: shenanigan.setByUser,
+            selectedUser: shenanigan.selectedUser,
+          };
+        }
+      );
+
       setShenanigans(shenanigansData);
-      console.log(shenanigansData);
+      console.log("Final shenanigans data with user details:", shenanigansData);
     };
 
     getShenanigans();
-    console.log(user?.uid); // Log the user's UID with null check
-  }, []); // Dependency array is empty to ensure this runs only once
+  }, [user?.uid]); // React to changes in user's UID
 
   return (
     <div className="overflow-x-auto bg-base-200 rounded-md">
-      <table className="table table-zebra">
+      <table className="table table-zebra w-full">
         <thead>
           <tr>
-            <th>Gebruiker</th>
+            <th>User</th>
             <th>Shenanigan</th>
             <th>Votes</th>
             <th>Down</th>
             <th>Up</th>
-            <th>Bewerken</th>
+            <th>Edit</th>
           </tr>
         </thead>
-
         <tbody>
           {shenanigans.map((shenanigan) => (
             <Shenanigan
               key={shenanigan.id}
-              userImage={shenanigan.image}
+              userImage={shenanigan.userImage}
               shenanigan={shenanigan.setShenanigan}
-              userLevel={shenanigan.level}
+              userLevel={shenanigan.userLevel}
               counter={shenanigan.counter}
-              showEditButton={user !== null && user?.uid === shenanigan.userId} // Add null check for 'user' variable
+              showEditButton={
+                user !== null && user?.uid === shenanigan.setByUser
+              } // Show edit button if the logged in user set the shenanigan
               user={shenanigan.userId}
-              username={shenanigan.selectedUser}
+              username={shenanigan.username}
             />
           ))}
         </tbody>
-        <tfoot>
-          <tr>
-            <th>Gebruiker</th>
-            <th>Shenanigan</th>
-            <th>Votes</th>
-          </tr>
-        </tfoot>
       </table>
     </div>
   );
