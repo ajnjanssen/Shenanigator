@@ -78,10 +78,8 @@ function Table() {
           <tr>
             <th>User</th>
             <th>Shenanigan</th>
-            <th>Votes</th>
-            <th>Down</th>
-            <th>Up</th>
-            <th>Edit</th>
+            <th className="pl-8">Votes</th>
+            <th className="pl-8">Edit</th>
           </tr>
         </thead>
         <tbody>

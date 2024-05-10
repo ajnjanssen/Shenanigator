@@ -40,18 +40,15 @@ const Shenanigan: React.FC<ShenaniganProps> = ({
         </Link>
       </td>
       <td>{shenanigan}</td>
+
       <td>
+        <button className="btn btn-xl btn-ghost text-xl w-fit">👎🏻</button>
         <div className="badge">{counter}</div>
+        <button className="btn btn-xl btn-ghost text-xl">👍🏻</button>
       </td>
       <th>
-        <button className="btn btn-sm btn-ghost w-full">👎🏻</button>
-      </th>
-      <th>
-        <button className="btn btn-sm btn-ghost w-full">👍🏻</button>
-      </th>
-      <th>
         {showEditButton ? (
-          <button className="btn btn-sm btn-ghost w-full">Bewerken ✏️</button>
+          <button className="btn btn-xl btn-ghost text-sm">Bewerken ✏️</button>
         ) : null}
       </th>
     </tr>
