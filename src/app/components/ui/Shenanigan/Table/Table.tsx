@@ -86,6 +86,7 @@ function Table() {
           {shenanigans.map((shenanigan) => (
             <Shenanigan
               key={shenanigan.id}
+              id={shenanigan.id} // Add id prop here
               userImage={shenanigan.userImage}
               shenanigan={shenanigan.setShenanigan}
               userLevel={shenanigan.userLevel}

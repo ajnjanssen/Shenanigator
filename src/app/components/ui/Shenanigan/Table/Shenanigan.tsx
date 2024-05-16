@@ -1,27 +1,92 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Level from "./ui/Level";
 import Link from "next/link";
+import { doc, runTransaction } from "firebase/firestore";
+import { db } from "@/app/services/firebase";
 
 interface ShenaniganProps {
-  user: string;
-  userImage: string;
-  userLevel: string; // Now correctly typed as a number
-  shenanigan: string;
   counter: number;
+  dateCreated: string;
+  id: string; // Document ID
+  image: string;
+  level: string;
+  selectedUser: string;
+  setByUser: string;
+  setShenanigan: string;
+  userId: string;
+  userImage: string;
+  userLevel: string;
   username: string;
   showEditButton?: boolean;
 }
 
 const Shenanigan: React.FC<ShenaniganProps> = ({
-  user,
+  counter,
+  dateCreated,
+  id,
+  image,
+  level,
+  selectedUser,
+  setByUser,
+  setShenanigan,
+  userId,
   userImage,
   userLevel,
-  shenanigan,
-  counter,
   username,
-
   showEditButton = true,
 }) => {
+  const [vote, setVote] = useState<number>(0);
+
+  useEffect(() => {
+    // Log all props to verify correct values
+    console.log("Shenanigan component props:", {
+      counter,
+      dateCreated,
+      id,
+      image,
+      level,
+      selectedUser,
+      setByUser,
+      setShenanigan,
+      userId,
+      userImage,
+      userLevel,
+      username,
+      showEditButton,
+    });
+  }, []);
+
+  const handleVote = async (voteType: number) => {
+    if (vote === 0) {
+      if (!id) {
+        console.error("Shenanigan ID is undefined or null");
+        return;
+      }
+
+      console.log("Shenanigan ID:", id); // Debugging line to ensure id is correct
+
+      const shenaniganRef = doc(db, "shenanigans", id);
+
+      try {
+        await runTransaction(db, async (transaction) => {
+          const docSnapshot = await transaction.get(shenaniganRef);
+          if (!docSnapshot.exists()) {
+            throw new Error("Shenanigan does not exist!");
+          }
+
+          const currentCounter = docSnapshot.data()?.counter || 0;
+          transaction.update(shenaniganRef, {
+            counter: currentCounter + voteType,
+          });
+        });
+
+        setVote(voteType);
+      } catch (error) {
+        console.error("Error updating shenanigan counter:", error);
+      }
+    }
+  };
+
   return (
     <tr className="hover">
       <td>
@@ -39,12 +104,23 @@ const Shenanigan: React.FC<ShenaniganProps> = ({
           </div>
         </Link>
       </td>
-      <td>{shenanigan}</td>
+      <td>{setShenanigan}</td>
 
       <td>
-        <button className="btn btn-xl btn-ghost text-xl w-fit">👎🏻</button>
-        <div className="badge">{counter}</div>
-        <button className="btn btn-xl btn-ghost text-xl">👍🏻</button>
+        <button
+          className="btn btn-xl btn-ghost text-xl w-fit"
+          onClick={() => handleVote(-1)}
+        >
+          👎🏻
+        </button>
+        <div className="badge">{counter + vote}</div>{" "}
+        {/* Display updated counter */}
+        <button
+          className="btn btn-xl btn-ghost text-xl"
+          onClick={() => handleVote(1)}
+        >
+          👍🏻
+        </button>
       </td>
       <th>
         {showEditButton ? (
