@@ -7,7 +7,7 @@ import { db } from "@/app/services/firebase";
 interface ShenaniganProps {
   counter: number;
   dateCreated: string;
-  id: string; // Document ID
+  id: string;
   image: string;
   level: string;
   selectedUser: string;
@@ -18,6 +18,7 @@ interface ShenaniganProps {
   userLevel: string;
   username: string;
   showEditButton?: boolean;
+  onEditClick: () => void; // New prop
 }
 
 const Shenanigan: React.FC<ShenaniganProps> = ({
@@ -34,27 +35,9 @@ const Shenanigan: React.FC<ShenaniganProps> = ({
   userLevel,
   username,
   showEditButton = true,
+  onEditClick,
 }) => {
   const [vote, setVote] = useState<number>(0);
-
-  useEffect(() => {
-    // Log all props to verify correct values
-    console.log("Shenanigan component props:", {
-      counter,
-      dateCreated,
-      id,
-      image,
-      level,
-      selectedUser,
-      setByUser,
-      setShenanigan,
-      userId,
-      userImage,
-      userLevel,
-      username,
-      showEditButton,
-    });
-  }, []);
 
   const handleVote = async (voteType: number) => {
     if (vote === 0) {
@@ -105,7 +88,6 @@ const Shenanigan: React.FC<ShenaniganProps> = ({
         </Link>
       </td>
       <td>{setShenanigan}</td>
-
       <td>
         <button
           className="btn btn-xl btn-ghost text-xl w-fit"
@@ -113,8 +95,7 @@ const Shenanigan: React.FC<ShenaniganProps> = ({
         >
           👎🏻
         </button>
-        <div className="badge">{counter + vote}</div>{" "}
-        {/* Display updated counter */}
+        <div className="badge">{counter + vote}</div>
         <button
           className="btn btn-xl btn-ghost text-xl"
           onClick={() => handleVote(1)}
@@ -124,7 +105,12 @@ const Shenanigan: React.FC<ShenaniganProps> = ({
       </td>
       <th>
         {showEditButton ? (
-          <button className="btn btn-xl btn-ghost text-sm">Bewerken ✏️</button>
+          <button
+            onClick={onEditClick}
+            className="btn btn-xl btn-ghost text-sm"
+          >
+            Bewerken ✏️
+          </button>
         ) : null}
       </th>
     </tr>
